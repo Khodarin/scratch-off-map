@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scratch Off Map</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: #f4f4f4;
+            height: 100vh;
+        }
+        h1 {
+            margin-top: 20px;
+        }
+        #map {
+            position: relative;
+            width: 90%;
+            max-width: 800px;
+            margin: 20px auto;
+        }
+        canvas {
+            border: 1px solid #ccc;
+            width: 100%;
+            height: auto;
+        }
+        .button-container {
+            margin-top: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Scratch Off Map</h1>
+    <div id="map">
+        <canvas id="scratchMap" width="800" height="450"></canvas>
+    </div>
+    <div class="button-container">
+        <button id="resetButton">Reset Map</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('scratchMap');
+        const ctx = canvas.getContext('2d');
+
+        const mapImage = new Image();
+        mapImage.src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/BlankMap-World.svg/2000px-BlankMap-World.svg.png';
+        
+        mapImage.onload = () => {
+            ctx.drawImage(mapImage, 0, 0, canvas.width, canvas.height);
+            overlayScratchLayer();
+        };
+
+        function overlayScratchLayer() {
+            ctx.fillStyle = 'gray';
+            ctx.globalAlpha = 0.7;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        let isScratching = false;
+
+        canvas.addEventListener('mousedown', () => {
+            isScratching = true;
+        });
+
+        canvas.addEventListener('mouseup', () => {
+            isScratching = false;
+        });
+
+        canvas.addEventListener('mousemove', (event) => {
+            if (isScratching) {
+                const rect = canvas.getBoundingClientRect();
+                const x = event.clientX - rect.left;
+                const y = event.clientY - rect.top;
+                scratch(x, y);
+            }
+        });
+
+        function scratch(x, y) {
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.beginPath();
+            ctx.arc(x, y, 20, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        document.getElementById('resetButton').addEventListener('click', () => {
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.drawImage(mapImage, 0, 0, canvas.width, canvas.height);
+            overlayScratchLayer();
+        });
+    </script>
+</body>
+</html>
